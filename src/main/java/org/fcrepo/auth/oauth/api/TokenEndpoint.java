@@ -8,6 +8,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.status;
 
+import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.servlet.http.HttpServletRequest;
@@ -35,6 +36,8 @@ import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
 import org.apache.oltu.oauth2.common.message.types.GrantType;
 import org.fcrepo.AbstractResource;
+import static org.fcrepo.auth.oauth.filter.Constants.CLIENT_PROPERTY;
+import static org.fcrepo.auth.oauth.filter.Constants.PRINCIPAL_PROPERTY;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -117,8 +120,10 @@ public class TokenEndpoint extends AbstractResource {
                 return status(response.getResponseStatus()).entity(
                         response.getBody()).build();
             }
+
             final String token = oauthIssuerImpl.accessToken();
-            saveToken(token);
+            saveToken(token, oauthRequest.getClientId(), oauthRequest
+                    .getUsername());
             final OAuthResponse response =
                     tokenResponse(SC_OK).setAccessToken(token).setExpiresIn(
                             "3600").buildJSONMessage();
@@ -133,10 +138,14 @@ public class TokenEndpoint extends AbstractResource {
         }
     }
 
-    private void saveToken(final String token) throws RepositoryException {
+    private void saveToken(final String token, final String client,
+            final String username) throws RepositoryException {
         final Session session = sessions.getSession();
         try {
-            jcrTools.findOrCreateNode(session, "/tokens/" + token);
+            final Node tokenNode =
+                    jcrTools.findOrCreateNode(session, "/tokens/" + token);
+            tokenNode.setProperty(CLIENT_PROPERTY, client);
+            tokenNode.setProperty(PRINCIPAL_PROPERTY, username);
             session.save();
         } finally {
             session.logout();

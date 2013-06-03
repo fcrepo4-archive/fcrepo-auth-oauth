@@ -7,7 +7,7 @@
     <version>4.0-SNAPSHOT</version>
   </parent>
   <artifactId>fcrepo-auth-oauth</artifactId>
-  <name>Apache Oltu OAuth2 module for Fedora Commons</name>
+  <name>Apache Oltu OAuth2 module for Fedora Commons 4</name>
   <dependencies>
     <dependency>
       <artifactId>fcrepo-http-api</artifactId>
@@ -85,14 +85,7 @@
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
     </dependency>
-    <!-- This dependency is for compile-time: it keeps this module independent 
-      of any given choice of JAX-RS implementation. It must be _after_ the test 
-      gear. Otherwise it will get loaded during test phase, but because this is 
-      just an API, the tests will not be able to execute. -->
-    <dependency>
-      <groupId>javax</groupId>
-      <artifactId>javaee-api</artifactId>
-    </dependency>
+   
   </dependencies>
   <repositories>
     <repository>

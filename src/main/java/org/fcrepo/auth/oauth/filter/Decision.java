@@ -12,11 +12,17 @@ public class Decision implements OAuthDecision {
 
     private Principal principal;
 
-    private boolean authorized;
+    private boolean isAuthorized;
 
-    public Decision(final String client, final String principal,
-            final Boolean isAuthorized) {
-        this.oAuthClient = null;
+    public Decision(final String client, final String principal) {
+        this.oAuthClient = new OAuthClient() {
+
+            @Override
+            public String getClientId() {
+                return client;
+            }
+
+        };
         this.principal = new Principal() {
 
             @Override
@@ -25,7 +31,6 @@ public class Decision implements OAuthDecision {
             }
 
         };
-        this.authorized = isAuthorized;
     }
 
     @Override
@@ -35,14 +40,16 @@ public class Decision implements OAuthDecision {
 
     @Override
     public Principal getPrincipal() {
-        // TODO Auto-generated method stub
         return principal;
     }
 
     @Override
     public boolean isAuthorized() {
-        // TODO Auto-generated method stub
-        return authorized;
+        return isAuthorized;
+    }
+
+    public void setAuthorized(final boolean isAuthorized) {
+        this.isAuthorized = isAuthorized;
     }
 
 }
