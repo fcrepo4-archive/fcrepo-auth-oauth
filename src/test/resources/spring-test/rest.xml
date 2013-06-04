@@ -6,16 +6,40 @@
   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
-  <bean class="org.fcrepo.session.SessionFactory"/>
-
-  <!-- Mints PIDs-->
-  <bean class="org.fcrepo.identifiers.UUIDPidMinter"/>
 
   <context:annotation-config/>
-
+  
   <context:component-scan
     base-package="org.fcrepo.api, org.fcrepo.serialization, org.fcrepo.responses, org.fcrepo.auth.oauth.api, org.fcrepo.url"/>
-
+  
+  <!-- mints JCR Sessions -->
+  <bean class="org.fcrepo.session.SessionFactory"/>
+  <!-- Mints PIDs-->
+  <bean class="org.fcrepo.identifiers.UUIDPidMinter"/>
+  
+  <!-- AuthN filters -->
+  <bean name="oauthFilter" class="org.fcrepo.auth.oauth.filter.OAuthFilter">
+    <property name="realm" value="fedora"/>
+    <property name="provider">
+      <bean class="org.fcrepo.auth.oauth.DefaultOAuthResourceProvider">
+        <property name="sessionFactory">
+          <!-- mints JCR Sessions : needs to reappear here because it can't be autowired from the enclosed contexts-->
+          <bean class="org.fcrepo.session.SessionFactory"/>
+        </property>
+      </bean>
+    </property>
+    <property name="parameterStyles">
+      <set
+        value-type="org.apache.oltu.oauth2.common.message.types.ParameterStyle">
+        <value>QUERY</value>
+        <value>HEADER</value>
+      </set>
+    </property>
+  </bean>
+  
+  <bean name="authNFilter" class="org.fcrepo.auth.oauth.filter.RestrictToAuthNFilter"/>
+  
+  <!-- used by (de)serialization endpoints -->
   <util:map id="serializers" key-type="java.lang.String" map-class="java.util.HashMap"
     value-type="org.fcrepo.serialization.FedoraObjectSerializer">
     <description>Map from formats to serializers for Fedora objects</description>

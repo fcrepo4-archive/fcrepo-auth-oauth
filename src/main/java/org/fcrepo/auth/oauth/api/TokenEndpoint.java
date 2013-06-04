@@ -1,13 +1,24 @@
 
 package org.fcrepo.auth.oauth.api;
 
+import static com.google.common.collect.ImmutableSet.copyOf;
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.status;
+import static org.apache.oltu.oauth2.as.response.OAuthASResponse.tokenResponse;
+import static org.apache.oltu.oauth2.common.OAuth.OAUTH_GRANT_TYPE;
+import static org.apache.oltu.oauth2.common.error.OAuthError.TokenResponse.INVALID_CLIENT;
+import static org.apache.oltu.oauth2.common.error.OAuthError.TokenResponse.INVALID_GRANT;
+import static org.apache.oltu.oauth2.common.error.OAuthError.TokenResponse.UNAUTHORIZED_CLIENT;
+import static org.apache.oltu.oauth2.common.message.OAuthResponse.errorResponse;
+import static org.fcrepo.auth.oauth.Constants.CLIENT_PROPERTY;
+import static org.fcrepo.auth.oauth.Constants.OAUTH_WORKSPACE;
+import static org.fcrepo.auth.oauth.Constants.PRINCIPAL_PROPERTY;
 
+import javax.annotation.PostConstruct;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -19,12 +30,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
-import static org.apache.oltu.oauth2.as.response.OAuthASResponse.tokenResponse;
-import static org.apache.oltu.oauth2.common.message.OAuthResponse.errorResponse;
-import static org.apache.oltu.oauth2.common.OAuth.OAUTH_GRANT_TYPE;
-import static org.apache.oltu.oauth2.common.error.OAuthError.TokenResponse.INVALID_GRANT;
-import static org.apache.oltu.oauth2.common.error.OAuthError.TokenResponse.UNAUTHORIZED_CLIENT;
-import static org.apache.oltu.oauth2.common.error.OAuthError.TokenResponse.INVALID_CLIENT;
 import org.apache.oltu.oauth2.as.issuer.MD5Generator;
 import org.apache.oltu.oauth2.as.issuer.OAuthIssuer;
 import org.apache.oltu.oauth2.as.issuer.OAuthIssuerImpl;
@@ -36,8 +41,6 @@ import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
 import org.apache.oltu.oauth2.common.message.types.GrantType;
 import org.fcrepo.AbstractResource;
-import static org.fcrepo.auth.oauth.filter.Constants.CLIENT_PROPERTY;
-import static org.fcrepo.auth.oauth.filter.Constants.PRINCIPAL_PROPERTY;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -140,7 +143,7 @@ public class TokenEndpoint extends AbstractResource {
 
     private void saveToken(final String token, final String client,
             final String username) throws RepositoryException {
-        final Session session = sessions.getSession();
+        final Session session = sessions.getSession(OAUTH_WORKSPACE);
         try {
             final Node tokenNode =
                     jcrTools.findOrCreateNode(session, "/tokens/" + token);
@@ -156,6 +159,19 @@ public class TokenEndpoint extends AbstractResource {
     private boolean isValid() {
         // TODO actually do some checking of client ID and secret and so forth
         return false;
+    }
+
+    @PostConstruct
+    public void init() throws RepositoryException {
+        final Session session = sessions.getSession();
+        try {
+            if (!copyOf(session.getWorkspace().getAccessibleWorkspaceNames())
+                    .contains(OAUTH_WORKSPACE)) {
+                session.getWorkspace().createWorkspace(OAUTH_WORKSPACE);
+            }
+        } finally {
+            session.logout();
+        }
     }
 
 }

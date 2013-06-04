@@ -1,6 +1,7 @@
 
 package org.fcrepo.auth.oauth.api;
 
+import static com.google.common.collect.ImmutableSet.copyOf;
 import static javax.servlet.http.HttpServletResponse.SC_FOUND;
 import static javax.ws.rs.core.Response.status;
 import static org.apache.oltu.oauth2.as.response.OAuthASResponse.authorizationResponse;
@@ -18,6 +19,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.annotation.PostConstruct;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.oltu.oauth2.as.issuer.MD5Generator;
 import org.apache.oltu.oauth2.as.issuer.OAuthIssuerImpl;
@@ -26,13 +30,15 @@ import org.apache.oltu.oauth2.as.response.OAuthASResponse;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
+import org.fcrepo.AbstractResource;
 import org.springframework.stereotype.Component;
 
 import static org.apache.oltu.oauth2.common.message.OAuthResponse.errorResponse;
+import static org.fcrepo.auth.oauth.Constants.OAUTH_WORKSPACE;
 
 @Component
 @Path("/authorization")
-public class AuthzEndpoint {
+public class AuthzEndpoint extends AbstractResource {
 
     @GET
     public Response authorize(@Context
@@ -87,6 +93,19 @@ public class AuthzEndpoint {
                             .buildQueryMessage();
             final URI location = new URI(response.getLocationUri());
             return responseBuilder.location(location).build();
+        }
+    }
+
+    @PostConstruct
+    public void init() throws RepositoryException {
+        final Session session = sessions.getSession();
+        try {
+            if (!copyOf(session.getWorkspace().getAccessibleWorkspaceNames())
+                    .contains(OAUTH_WORKSPACE)) {
+                session.getWorkspace().createWorkspace(OAUTH_WORKSPACE);
+            }
+        } finally {
+            session.logout();
         }
     }
 
