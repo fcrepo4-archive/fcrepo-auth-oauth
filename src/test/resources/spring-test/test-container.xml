@@ -7,22 +7,12 @@
 
   <context:property-placeholder/>
 
-  <bean id="containerWrapper" class="org.fcrepo.test.util.ContainerWrapper"
+  <bean id="containerWrapper" class="org.fcrepo.auth.oauth.integration.api.ContainerWrapper"
     init-method="start" destroy-method="stop">
     <property name="port" value="${test.port:8080}"/>
-    <property name="contextConfigLocations"
-      value="classpath:spring-test/repo.xml, classpath:spring-test/rest.xml"/>
+    <property name="contextConfigLocation"
+      value="classpath:spring-test/rest.xml; classpath:spring-test/repo.xml; classpath:spring-test/security.xml"/>
     <property name="packagesToScan"
       value="org.fcrepo.api, org.fcrepo.responses, org.fcrepo.auth.oauth.api"/>
-    <property name="filters">
-      <list value-type="javax.servlet.Filter">
-        <bean class="org.springframework.web.filter.DelegatingFilterProxy">
-          <property name="targetBeanName" value="oauthFilter"/>
-        </bean>
-        <bean class="org.springframework.web.filter.DelegatingFilterProxy">
-          <property name="targetBeanName" value="authNFilter"/>
-        </bean>
-      </list>
-    </property>
   </bean>
 </beans>
