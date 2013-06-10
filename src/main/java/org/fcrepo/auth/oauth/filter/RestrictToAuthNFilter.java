@@ -1,7 +1,6 @@
 
 package org.fcrepo.auth.oauth.filter;
 
-import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -22,6 +21,8 @@ public class RestrictToAuthNFilter implements Filter {
 
     private static final Logger LOGGER = getLogger(RestrictToAuthNFilter.class);
 
+    private static final String AUTHENTICATED_SECTION = "/authenticated/";
+
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
         LOGGER.debug("Initialized {}", this.getClass().getName());
@@ -41,14 +42,22 @@ public class RestrictToAuthNFilter implements Filter {
             throws IOException, ServletException {
         final HttpServletRequest req = (HttpServletRequest) request;
         final HttpServletResponse res = (HttpServletResponse) response;
-        if (req.getUserPrincipal() != null) {
-            res.sendError(SC_UNAUTHORIZED);
-        }
-        if (req.isUserInRole("kosher")) {
-            chain.doFilter(request, response);
-            return;
+        final String requestURI = req.getRequestURI();
+        LOGGER.debug("Received request at URI: {}", requestURI);
+        if (requestURI.contains(AUTHENTICATED_SECTION)) {
+            // a protected resource
+            LOGGER.debug("{} is a protected resource.", requestURI);
+            if (req.getUserPrincipal() != null) {
+                LOGGER.debug("Couldn't find authenticated user!");
+                res.sendError(SC_UNAUTHORIZED);
+            } else {
+                LOGGER.debug("Found authenticated user.");
+                chain.doFilter(request, response);
+            }
         } else {
-            res.sendError(SC_FORBIDDEN);
+            // not a protected resource
+            LOGGER.debug("{} is not a protected resource.", requestURI);
+            chain.doFilter(request, response);
         }
 
     }

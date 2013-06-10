@@ -1,6 +1,7 @@
 
 package org.fcrepo.auth.oauth.integration.api;
 
+import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.junit.Assert.assertEquals;
@@ -38,6 +39,14 @@ public class TestTokenEndpoint extends AbstractResourceIT {
     @Test
     public void testUseToken() throws ClientProtocolException, IOException {
         logger.trace("Entering testUseToken()...");
+        logger.debug("Trying to write an object to authenticated area without authentication via token...");
+        final HttpResponse failure =
+                client.execute(postObjMethod("authenticated/testUseToken"));
+        assertEquals(
+                "Was able to write to an authenticated area when I shouldn't be able to",
+                SC_UNAUTHORIZED, failure.getStatusLine().getStatusCode());
+        logger.debug("Failed as expected.");
+        logger.debug("Now trying with authentication via token...");
         final HttpPost post =
                 new HttpPost(
                         tokenEndpoint +
