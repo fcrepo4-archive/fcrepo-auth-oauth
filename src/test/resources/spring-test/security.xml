@@ -16,7 +16,7 @@
         <bean class="org.fcrepo.auth.oauth.DefaultOAuthResourceProvider">
           <property name="sessionFactory">
             <!-- mints JCR Sessions : needs to reappear here because it can't be autowired from the enclosed contexts-->
-            <bean class="org.fcrepo.session.SessionFactory"/>
+            <ref bean="org.fcrepo.session.SessionFactory"/>
           </property>
         </bean>
       </property>
@@ -29,6 +29,6 @@
       </property>
     </bean>
   
-    <bean name="authNFilter" class="org.fcrepo.auth.oauth.filter.RestrictToAuthNFilter"/>
+    <bean name="authNFilter" class="org.fcrepo.auth.oauth.filter.RestrictToAuthNFilter" init-method="init" />
     
 </beans>

@@ -25,6 +25,11 @@ public class RestrictToAuthNFilter implements Filter {
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
+    	init();
+    }
+    
+    // used by Spring
+    public void init() {
         LOGGER.debug("Initialized {}", this.getClass().getName());
     }
 
