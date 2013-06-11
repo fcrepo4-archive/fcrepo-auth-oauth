@@ -1,12 +1,16 @@
 
 package org.fcrepo.auth.oauth.integration.api;
 
+import static java.util.regex.Pattern.compile;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -16,8 +20,12 @@ import org.junit.Test;
 
 public class TestTokenEndpoint extends AbstractResourceIT {
 
-    final String tokenEndpoint = "http://" + HOSTNAME + ":" + SERVER_PORT +
-            "/token";
+    private final String tokenEndpoint = "http://" + HOSTNAME + ":" +
+            SERVER_PORT + "/token";
+
+    private final String tokenRegexp = "access_token\":\"(.+?)\"";
+
+    private final Pattern tokenPattern = compile(tokenRegexp);
 
     @Test
     public void testGetToken() throws Exception {
@@ -54,11 +62,22 @@ public class TestTokenEndpoint extends AbstractResourceIT {
         post.addHeader("Accept", APPLICATION_JSON);
         post.addHeader("Content-type", APPLICATION_FORM_URLENCODED);
         final HttpResponse tokenResponse = client.execute(post);
-        logger.debug("Got a token response: \n{}", EntityUtils
-                .toString(tokenResponse.getEntity()));
+        final String tokenResponseString =
+                EntityUtils.toString(tokenResponse.getEntity());
+        logger.debug("Got a token response: \n{}", tokenResponseString);
         assertEquals("Couldn't retrieve a token from token endpoint!", 200,
                 tokenResponse.getStatusLine().getStatusCode());
 
+        final Matcher tokenMatcher = tokenPattern.matcher(tokenResponseString);
+        assertTrue("Couldn't find token in token response!", tokenMatcher
+                .find());
+        final String token = tokenMatcher.group(1);
+        logger.debug("Found token: {}", token);
+        final HttpPost successMethod =
+                postObjMethod("authenticated/testUseToken?access_token=" +
+                        token);
+        final HttpResponse success = client.execute(successMethod);
+        assertEquals("Failed to create object even with authentication!", 201,
+                success.getStatusLine().getStatusCode());
     }
-
 }
