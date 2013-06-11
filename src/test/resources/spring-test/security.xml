@@ -10,7 +10,7 @@
 
     <context:annotation-config/>
 
-    <bean name="oauthFilter" class="org.fcrepo.auth.oauth.filter.OAuthFilter">
+    <bean name="oauthFilter" class="org.fcrepo.auth.oauth.filter.OAuthFilter" init-method="init">
       <property name="realm" value="fedora"/>
       <property name="provider">
         <bean class="org.fcrepo.auth.oauth.DefaultOAuthResourceProvider">

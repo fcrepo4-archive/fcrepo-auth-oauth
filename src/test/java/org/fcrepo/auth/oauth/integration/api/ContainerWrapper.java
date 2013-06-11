@@ -86,7 +86,6 @@ public class ContainerWrapper implements ApplicationContextAware {
         
         server = GrizzlyWebContainerFactory.create(uri, initParams);
         
-        
         WebappContext wac = new WebappContext("test", "");
         
         wac.addContextInitParameter("contextConfigLocation",
@@ -98,25 +97,23 @@ public class ContainerWrapper implements ApplicationContextAware {
         ServletRegistration servlet = wac.addServlet("jersey-servlet", SpringServlet.class);
         
         servlet.addMapping("/*");
-        
-//        servlet.setInitParameter(ServletContainer.RESOURCE_CONFIG_CLASS, 
-//        		PackagesResourceConfig.class.getName());
-        
+                
         servlet.setInitParameter("com.sun.jersey.config.property.packages", "org.fcrepo");
 
         servlet.setInitParameter("com.sun.jersey.api.json.POJOMappingFeature", "true");
-//
-//        FilterRegistration filter = wac.addFilter("delegating-2", DelegatingFilterProxy.class);
-//        
-//        filter.setInitParameter("targetBeanName", "oauthFilter");
-//        
-//        filter.addMappingForUrlPatterns(null, "/authorization");
-//        
-//        filter = wac.addFilter("delegating-1", DelegatingFilterProxy.class);
-//        
-//        filter.setInitParameter("targetBeanName", "authNFilter");
-//        
-//        filter.addMappingForUrlPatterns(null, "/token");
+
+        FilterRegistration opFilter = wac.addFilter("OpFilter", DelegatingFilterProxy.class);
+        
+        opFilter.setInitParameter("targetBeanName", "oauthFilter");
+        
+        opFilter.addMappingForUrlPatterns(null, "/rest/objects/authenticated/*");
+        opFilter.addMappingForUrlPatterns(null, "/rest/objects/authenticated");
+        
+        FilterRegistration tokenFilter = wac.addFilter("TokenFilter", DelegatingFilterProxy.class);
+        
+        tokenFilter.setInitParameter("targetBeanName", "authNFilter");
+        
+        tokenFilter.addMappingForUrlPatterns(null, "/token");
             	
         wac.deploy(server);
 

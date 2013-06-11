@@ -8,6 +8,7 @@ import static org.apache.oltu.oauth2.common.error.OAuthError.CodeResponse.INVALI
 import static org.apache.oltu.oauth2.common.error.OAuthError.ResourceResponse.INSUFFICIENT_SCOPE;
 import static org.apache.oltu.oauth2.common.message.OAuthResponse.errorResponse;
 import static org.apache.oltu.oauth2.rsfilter.OAuthUtils.isEmpty;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -30,18 +31,26 @@ import org.apache.oltu.oauth2.common.message.types.ParameterStyle;
 import org.apache.oltu.oauth2.rs.request.OAuthAccessResourceRequest;
 import org.apache.oltu.oauth2.rsfilter.OAuthDecision;
 import org.apache.oltu.oauth2.rsfilter.OAuthRSProvider;
+import org.slf4j.Logger;
 
 public class OAuthFilter implements Filter {
+
+    private static final Logger LOGGER = getLogger(OAuthFilter.class);
 
     private String realm;
 
     private OAuthRSProvider provider;
 
     private Set<ParameterStyle> parameterStyles;
+    
+    public void init() {
+        LOGGER.debug("Initing {}", getClass().getName());
+
+    }
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
-
+        init();
     }
 
     @Override
@@ -51,6 +60,7 @@ public class OAuthFilter implements Filter {
         final HttpServletRequest req = (HttpServletRequest) request;
         final HttpServletResponse res = (HttpServletResponse) response;
 
+        LOGGER.debug("Filtering {}", ((HttpServletRequest)request).getRequestURI());
         try {
 
             // Make an OAuth Request out of this servlet request
@@ -61,6 +71,7 @@ public class OAuthFilter implements Filter {
             // Get the access token
             final String accessToken = oauthRequest.getAccessToken();
 
+            LOGGER.debug("Validating {}", accessToken);
             final OAuthDecision decision =
                     provider.validateRequest(realm, accessToken, req);
 
