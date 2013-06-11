@@ -21,7 +21,7 @@
     </context-param>
     <context-param>
       <param-name>org.modeshape.jcr.URL</param-name>
-      <param-value>WEB-INF/classes/config/repository.json</param-value>
+      <param-value>/test_repository.json</param-value>
     </context-param>
 
     <listener>
@@ -53,7 +53,15 @@
 	</servlet-mapping>
 	
 	<filter>
-	    <filter-name>delegating-1</filter-name>
+	    <filter-name>WrapFilter</filter-name>
+	    <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+	    <init-param>
+	      <param-name>targetBeanName</param-name>
+	      <param-value>wrapFilter</param-value>
+	    </init-param>
+	</filter>
+	<filter>
+	    <filter-name>OpFilter</filter-name>
 	    <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
 	    <init-param>
 	      <param-name>targetBeanName</param-name>
@@ -61,7 +69,7 @@
 	    </init-param>
 	</filter>
 	<filter>
-	    <filter-name>delegating-2</filter-name>
+	    <filter-name>TokenFilter</filter-name>
 	    <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
 	    <init-param>
 	      <param-name>targetBeanName</param-name>
@@ -70,12 +78,16 @@
 	</filter>
 	
 	<filter-mapping>
-	    <filter-name>delegating-1</filter-name>
+	    <filter-name>TokenFilter</filter-name>
 	    <url-pattern>/token</url-pattern>
 	</filter-mapping>
 	<filter-mapping>
-	    <filter-name>delegating-2</filter-name>
-	    <url-pattern>/authorization</url-pattern>
+	    <filter-name>OpFilter</filter-name>
+	    <url-pattern>/rest/objects/authenticated/*</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+	    <filter-name>WrapFilter</filter-name>
+	    <url-pattern>/rest/objects/authenticated/*</url-pattern>
 	</filter-mapping>
   
   <!-- BASIC security parameters -->

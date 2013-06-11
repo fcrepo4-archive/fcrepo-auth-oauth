@@ -1,18 +1,24 @@
 
 package org.fcrepo.auth.oauth.integration.api;
 
-import static java.util.Collections.emptyList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.net.URI;
 import java.net.URL;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import javax.servlet.Filter;
-//import com.sun.grizzly.servlet.ServletRegistration;
-//import org.glassfish.grizzly.servlet.WebappContext;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+
+import org.fcrepo.auth.oauth.integration.api.bind.ContextParam;
+import org.fcrepo.auth.oauth.integration.api.bind.Filter;
+import org.fcrepo.auth.oauth.integration.api.bind.FilterMapping;
+import org.fcrepo.auth.oauth.integration.api.bind.InitParam;
+import org.fcrepo.auth.oauth.integration.api.bind.Listener;
+import org.fcrepo.auth.oauth.integration.api.bind.Servlet;
+import org.fcrepo.auth.oauth.integration.api.bind.ServletMapping;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.servlet.FilterRegistration;
 import org.glassfish.grizzly.servlet.ServletRegistration;
@@ -34,13 +40,11 @@ public class ContainerWrapper implements ApplicationContextAware {
     private int port;
 
     private HttpServer server;
+    
+    private String configLocation;
 
-    private List<Filter> filters = emptyList();
-
-    public void setPackagesToScan(final String packagesToScan) {
-    }
-
-    public void setContextConfigLocation(final String contextConfigLocation) {
+    public void setConfigLocation(final String configLocation) {
+        this.configLocation = configLocation.replaceFirst("^classpath:", "/");
     }
 
     public void setPort(final int port) {
@@ -48,59 +52,59 @@ public class ContainerWrapper implements ApplicationContextAware {
     }
 
     public void start() throws Exception {
-
-        final JerseyTest jt;
-
+    	
+		JAXBContext context = JAXBContext.newInstance(WebAppConfig.class);
+		Unmarshaller u = context.createUnmarshaller();
+		WebAppConfig o = (WebAppConfig) u.unmarshal(getClass().getResource(this.configLocation));
+    	
         final URI uri = URI.create("http://localhost:" + port + "/");
 
         final Map<String, String> initParams = new HashMap<String, String>();
 
         server = GrizzlyWebContainerFactory.create(uri, initParams);
+        
+        // create a "root" web application
+        WebappContext wac = new WebappContext(o.displayName(), "");
+        
+        for (ContextParam p: o.contextParams()) {
+        	wac.addContextInitParameter(p.name(), p.value());
+        }
+        
+        for (Listener l: o.listeners) {
+        	wac.addListener(l.className());
+        }
+        
+        for (Servlet s: o.servlets) {
+            ServletRegistration servlet = wac.addServlet(s.servletName(), s.servletClass());
+            
+            Collection<ServletMapping> mappings = o.servletMappings(s.servletName());
+            for (ServletMapping sm: mappings) {
+            	servlet.addMapping(sm.urlPattern());
+            }
+            for (InitParam p: s.initParams()) {
+            	servlet.setInitParameter(p.name(), p.value());
+            }
+        }
+        
+        for (Filter f: o.filters) {
+        	FilterRegistration filter = wac.addFilter(f.filterName(), f.filterClass());
+            
+            Collection<FilterMapping> mappings = o.filterMappings(f.filterName());
+            for (FilterMapping sm: mappings) {
+            	String urlPattern = sm.urlPattern();
+            	String servletName = sm.servletName();
+            	if (urlPattern != null) {
+            		filter.addMappingForUrlPatterns(null, urlPattern);
+            	} else {
+            		filter.addMappingForServletNames(null, servletName);
+            	}
 
-        final WebappContext wac = new WebappContext("test", "");
-
-        wac.addContextInitParameter("contextConfigLocation",
-                "classpath:spring-test/master.xml");
-
-        wac.addListener("org.springframework.web.context.ContextLoaderListener");
-        wac.addListener("org.springframework.web.context.request.RequestContextListener");
-
-        final ServletRegistration servlet =
-                wac.addServlet("jersey-servlet", SpringServlet.class);
-
-        servlet.addMapping("/*");
-
-        servlet.setInitParameter("com.sun.jersey.config.property.packages",
-                "org.fcrepo");
-
-        servlet.setInitParameter("com.sun.jersey.api.json.POJOMappingFeature",
-                "true");
-
-        final FilterRegistration wrapFilter =
-                wac.addFilter("WrapFilter", DelegatingFilterProxy.class);
-
-        wrapFilter.setInitParameter("targetBeanName", "wrapFilter");
-
-        wrapFilter.addMappingForUrlPatterns(null,
-                "/rest/objects/authenticated/*");
-        wrapFilter
-                .addMappingForUrlPatterns(null, "/rest/objects/authenticated");
-
-        final FilterRegistration opFilter =
-                wac.addFilter("OpFilter", DelegatingFilterProxy.class);
-
-        opFilter.setInitParameter("targetBeanName", "oauthFilter");
-
-        opFilter.addMappingForUrlPatterns(null, "/rest/objects/authenticated/*");
-        opFilter.addMappingForUrlPatterns(null, "/rest/objects/authenticated");
-
-        final FilterRegistration tokenFilter =
-                wac.addFilter("TokenFilter", DelegatingFilterProxy.class);
-
-        tokenFilter.setInitParameter("targetBeanName", "authNFilter");
-
-        tokenFilter.addMappingForUrlPatterns(null, "/token");
-
+            }
+            for (InitParam p: f.initParams()) {
+            	filter.setInitParameter(p.name(), p.value());
+            }
+        }
+            	
         wac.deploy(server);
 
         final URL webXml = this.getClass().getResource("/web.xml");
@@ -114,14 +118,11 @@ public class ContainerWrapper implements ApplicationContextAware {
         server.stop();
     }
 
-    public void setFilters(final List<Filter> filters) {
-        this.filters = filters;
-    }
-
-    @Override
-    public void setApplicationContext(
-            final ApplicationContext applicationContext) throws BeansException {
-
-    }
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext)
+			throws BeansException {
+		//this.applicationContext = applicationContext;
+		
+	}
 
 }
