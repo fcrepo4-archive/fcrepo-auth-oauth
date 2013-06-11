@@ -2,6 +2,8 @@
 package org.fcrepo.auth.oauth.filter;
 
 import static com.google.common.base.Throwables.propagate;
+import static org.fcrepo.auth.oauth.Constants.CLIENT_PROPERTY;
+import static org.fcrepo.auth.oauth.Constants.PRINCIPAL_PROPERTY;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import javax.jcr.Node;
@@ -19,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DefaultOAuthResourceProvider implements OAuthRSProvider, Constants {
+public class DefaultOAuthResourceProvider implements OAuthRSProvider {
 
     @Autowired
     SessionFactory sessionFactory;

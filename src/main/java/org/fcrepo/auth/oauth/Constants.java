@@ -10,4 +10,7 @@ public interface Constants {
 
     //TODO get namespaced properties to work
     public static final String PRINCIPAL_PROPERTY = "oauth-principal";
+
+    //TODO get namespaced properties to work
+    public static final String SCOPES_PROPERTY = "oauth-scopes";
 }

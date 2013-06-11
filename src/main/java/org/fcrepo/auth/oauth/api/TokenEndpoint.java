@@ -1,7 +1,6 @@
 
 package org.fcrepo.auth.oauth.api;
 
-import static com.google.common.collect.ImmutableSet.copyOf;
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
@@ -17,6 +16,8 @@ import static org.apache.oltu.oauth2.common.message.OAuthResponse.errorResponse;
 import static org.fcrepo.auth.oauth.Constants.CLIENT_PROPERTY;
 import static org.fcrepo.auth.oauth.Constants.OAUTH_WORKSPACE;
 import static org.fcrepo.auth.oauth.Constants.PRINCIPAL_PROPERTY;
+import static org.fcrepo.auth.oauth.api.Util.createOauthWorkspace;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import javax.annotation.PostConstruct;
 import javax.jcr.Node;
@@ -41,6 +42,7 @@ import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
 import org.apache.oltu.oauth2.common.message.types.GrantType;
 import org.fcrepo.AbstractResource;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -50,13 +52,16 @@ public class TokenEndpoint extends AbstractResource {
     public static final String INVALID_CLIENT_DESCRIPTION =
             "Client authentication failed (e.g., unknown client, no client authentication included, or unsupported authentication method).";
 
+    private static final Logger LOGGER = getLogger(TokenEndpoint.class);
+
     @POST
     @Consumes(APPLICATION_FORM_URLENCODED)
     @Produces(APPLICATION_JSON)
-    public Response authorize(@Context
+    public Response getToken(@Context
     final HttpServletRequest request) throws OAuthSystemException,
             RepositoryException {
-
+        LOGGER.debug("Received request for token carried on request: {}",
+                request);
         OAuthTokenRequest oauthRequest = null;
 
         final OAuthIssuer oauthIssuerImpl =
@@ -125,6 +130,7 @@ public class TokenEndpoint extends AbstractResource {
             }
 
             final String token = oauthIssuerImpl.accessToken();
+            LOGGER.debug("Created token: {}", token);
             saveToken(token, oauthRequest.getClientId(), oauthRequest
                     .getUsername());
             final OAuthResponse response =
@@ -163,15 +169,7 @@ public class TokenEndpoint extends AbstractResource {
 
     @PostConstruct
     public void init() throws RepositoryException {
-        final Session session = sessions.getSession();
-        try {
-            if (!copyOf(session.getWorkspace().getAccessibleWorkspaceNames())
-                    .contains(OAUTH_WORKSPACE)) {
-                session.getWorkspace().createWorkspace(OAUTH_WORKSPACE);
-            }
-        } finally {
-            session.logout();
-        }
+        createOauthWorkspace(sessions);
     }
 
 }
