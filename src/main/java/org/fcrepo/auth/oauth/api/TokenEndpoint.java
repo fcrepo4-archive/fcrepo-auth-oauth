@@ -1,8 +1,6 @@
 
 package org.fcrepo.auth.oauth.api;
 
-import static com.google.common.collect.Sets.intersection;
-import static com.google.common.collect.Sets.newHashSet;
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
@@ -19,10 +17,7 @@ import static org.apache.oltu.oauth2.common.message.types.GrantType.AUTHORIZATIO
 import static org.fcrepo.auth.oauth.Constants.CLIENT_PROPERTY;
 import static org.fcrepo.auth.oauth.Constants.OAUTH_WORKSPACE;
 import static org.fcrepo.auth.oauth.Constants.PRINCIPAL_PROPERTY;
-import static org.fcrepo.auth.oauth.Constants.SCOPES_PROPERTY;
 import static org.fcrepo.auth.oauth.api.Util.createOauthWorkspace;
-import static org.fcrepo.utils.FedoraTypesUtils.map;
-import static org.fcrepo.utils.FedoraTypesUtils.value2string;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.Set;
@@ -80,7 +75,7 @@ public class TokenEndpoint extends AbstractResource {
             oauthRequest = new OAuthTokenRequest(request);
 
             // TODO check if clientid is valid
-            if (isValid()) {
+            if (isNotValid()) {
                 final OAuthResponse response =
                         OAuthASResponse.errorResponse(SC_BAD_REQUEST).setError(
                                 INVALID_CLIENT).setErrorDescription(
@@ -90,7 +85,7 @@ public class TokenEndpoint extends AbstractResource {
             }
 
             // TODO check if client_secret is valid
-            if (isValid()) {
+            if (isNotValid()) {
                 final OAuthResponse response =
                         OAuthASResponse
                                 .errorResponse(SC_UNAUTHORIZED)
@@ -104,8 +99,7 @@ public class TokenEndpoint extends AbstractResource {
             // do checking for different grant types
             if (oauthRequest.getParam(OAUTH_GRANT_TYPE).equals(
                     AUTHORIZATION_CODE.toString())) {
-                // TODO check if authzcode is valid
-                if (isValidAuthCode(oauthRequest)) {
+                if (!isValidAuthCode(oauthRequest)) {
                     final OAuthResponse response =
                             errorResponse(SC_BAD_REQUEST).setError(
                                     INVALID_GRANT).setErrorDescription(
@@ -117,7 +111,7 @@ public class TokenEndpoint extends AbstractResource {
             } else if (oauthRequest.getParam(OAUTH_GRANT_TYPE).equals(
                     GrantType.PASSWORD.toString())) {
                 // TODO check if username/password is valid
-                if (isValid()) {
+                if (isNotValid()) {
                     final OAuthResponse response =
                             errorResponse(SC_BAD_REQUEST).setError(
                                     INVALID_GRANT).setErrorDescription(
@@ -159,23 +153,26 @@ public class TokenEndpoint extends AbstractResource {
     private boolean isValidAuthCode(final OAuthTokenRequest oauthRequest)
             throws RepositoryException {
         final String client = oauthRequest.getClientId();
+        LOGGER.debug("Request has authorization client: {}", client);
         final String code = oauthRequest.getCode();
         final Set<String> scopes = oauthRequest.getScopes();
         final Session session = sessions.getSession(OAUTH_WORKSPACE);
         try {
             final Node authCodeNode =
                     session.getNode("/authorization-codes/" + code);
+            LOGGER.debug("Found authorization code node stored: {}",
+                    authCodeNode.getPath());
             // if the client is right
             if (authCodeNode.getProperty(CLIENT_PROPERTY).getString().equals(
                     client)) {
-                final Set<String> storedScopes =
-                        newHashSet(map(authCodeNode
-                                .getProperty(SCOPES_PROPERTY).getValues(),
-                                value2string));
+                //                final Set<String> storedScopes =
+                //                        newHashSet(map(authCodeNode
+                //                                .getProperty(SCOPES_PROPERTY).getValues(),
+                //                                value2string));
                 // and if there is at least one scope in common
-                if (intersection(storedScopes, scopes).size() > 0) {
-                    return true;
-                }
+                //if (intersection(storedScopes, scopes).size() > 0) {
+                return true;
+                // }
             }
         } catch (final PathNotFoundException e) {
             // this wasn't a code we stored
@@ -203,7 +200,7 @@ public class TokenEndpoint extends AbstractResource {
 
     }
 
-    private boolean isValid() {
+    private boolean isNotValid() {
         // TODO actually do some checking of client ID and secret and so forth
         return false;
     }

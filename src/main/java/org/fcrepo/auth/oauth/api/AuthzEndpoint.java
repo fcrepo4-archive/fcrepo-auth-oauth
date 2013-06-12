@@ -38,6 +38,7 @@ import org.springframework.stereotype.Component;
 
 import static org.apache.oltu.oauth2.common.message.OAuthResponse.errorResponse;
 import static org.fcrepo.auth.oauth.Constants.CLIENT_PROPERTY;
+import static org.fcrepo.auth.oauth.Constants.EXPIRATION_TIMEOUT;
 import static org.fcrepo.auth.oauth.Constants.OAUTH_WORKSPACE;
 import static org.fcrepo.auth.oauth.api.Util.createOauthWorkspace;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -49,7 +50,7 @@ public class AuthzEndpoint extends AbstractResource {
     private static final Logger LOGGER = getLogger(AuthzEndpoint.class);
 
     @GET
-    public Response authorize(@Context
+    public Response getAuthorization(@Context
     final HttpServletRequest request) throws URISyntaxException,
             OAuthSystemException, RepositoryException {
 
@@ -78,7 +79,7 @@ public class AuthzEndpoint extends AbstractResource {
             }
             if (responseType.equals(TOKEN.toString())) {
                 builder.setAccessToken(oauthIssuerImpl.accessToken());
-                builder.setExpiresIn(3600l);
+                builder.setExpiresIn(EXPIRATION_TIMEOUT);
             }
 
             final String redirectURI =

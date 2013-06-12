@@ -18,10 +18,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.util.EntityUtils;
 import org.junit.Test;
 
-public class TestTokenEndpoint extends AbstractResourceIT {
-
-    private final String tokenEndpoint = "http://" + HOSTNAME + ":" +
-            SERVER_PORT + "/token";
+public class TokenEndpointIT extends AbstractOAuthResourceIT {
 
     private final String tokenRegexp = "access_token\":\"(.+?)\"";
 

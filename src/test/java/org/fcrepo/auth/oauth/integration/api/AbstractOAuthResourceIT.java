@@ -27,7 +27,13 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("/spring-test/test-container.xml")
-public abstract class AbstractResourceIT {
+public abstract class AbstractOAuthResourceIT {
+
+    protected final String authzEndpoint = "http://" + HOSTNAME + ":" +
+            SERVER_PORT + "/authorization";
+
+    protected final String tokenEndpoint = "http://" + HOSTNAME + ":" +
+            SERVER_PORT + "/token";
 
     protected Logger logger;
 
@@ -51,7 +57,7 @@ public abstract class AbstractResourceIT {
 
     protected static HttpClient client;
 
-    public AbstractResourceIT() {
+    public AbstractOAuthResourceIT() {
         connectionManager.setMaxTotal(MAX_VALUE);
         connectionManager.setDefaultMaxPerRoute(5);
         connectionManager.closeIdleConnections(3, SECONDS);

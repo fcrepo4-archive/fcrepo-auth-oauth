@@ -7,6 +7,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+
+import javax.annotation.PostConstruct;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -26,7 +28,7 @@ public class AuthenticatedRequestWrappingFilter implements Filter {
         init();
     }
 
-    // used by Spring
+    @PostConstruct
     public void init() {
         LOGGER.debug("Initialized {}", this.getClass().getName());
     }

@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -42,9 +43,10 @@ public class OAuthFilter implements Filter {
     private OAuthRSProvider provider;
 
     private Set<ParameterStyle> parameterStyles;
-    
+
+    @PostConstruct
     public void init() {
-        LOGGER.debug("Initing {}", getClass().getName());
+        LOGGER.debug("Initializing {}", getClass().getName());
 
     }
 
@@ -60,7 +62,8 @@ public class OAuthFilter implements Filter {
         final HttpServletRequest req = (HttpServletRequest) request;
         final HttpServletResponse res = (HttpServletResponse) response;
 
-        LOGGER.debug("Filtering {}", ((HttpServletRequest)request).getRequestURI());
+        LOGGER.debug("Filtering {}", ((HttpServletRequest) request)
+                .getRequestURI());
         try {
 
             // Make an OAuth Request out of this servlet request
