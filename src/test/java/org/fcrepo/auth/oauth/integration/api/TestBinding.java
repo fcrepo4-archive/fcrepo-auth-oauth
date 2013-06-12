@@ -9,13 +9,15 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import org.fcrepo.auth.oauth.integration.api.bind.ContextParam;
-import org.fcrepo.auth.oauth.integration.api.bind.FilterMapping;
-import org.fcrepo.auth.oauth.integration.api.bind.Listener;
-import org.fcrepo.auth.oauth.integration.api.bind.ServletMapping;
+import org.fcrepo.webxml.WebAppConfig;
+import org.fcrepo.webxml.bind.ContextParam;
+import org.fcrepo.webxml.bind.FilterMapping;
+import org.fcrepo.webxml.bind.Listener;
+import org.fcrepo.webxml.bind.ServletMapping;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 public class TestBinding {
 
@@ -30,17 +32,17 @@ public class TestBinding {
                 (WebAppConfig) u.unmarshal(getClass().getResourceAsStream(
                         "/web.xml"));
         assertEquals("Fedora-on-ModeShape", o.displayName());
-        assertTrue(o.contextParams.contains(new ContextParam(
+        assertTrue(o.contextParams().contains(new ContextParam(
                 "contextConfigLocation", "classpath:spring-test/rest.xml; "
                         + "classpath:spring-test/repo.xml; "
                         + "classpath:spring-test/security.xml")));
-        assertTrue(o.contextParams.contains(new ContextParam(
+        assertTrue(o.contextParams().contains(new ContextParam(
                 "org.modeshape.jcr.RepositoryName", "repo")));
-        assertTrue(o.contextParams.contains(new ContextParam(
+        assertTrue(o.contextParams().contains(new ContextParam(
                 "org.modeshape.jcr.URL", "/test_repository.json")));
-        assertTrue(o.listeners.contains(new Listener(null,
+        assertTrue(o.listeners().contains(new Listener(null,
                 "org.springframework.web.context.ContextLoaderListener")));
-        assertTrue(o.listeners.contains(new Listener(null,
+        assertTrue(o.listeners().contains(new Listener(null,
                 "org.modeshape.web.jcr.ModeShapeJcrDeployer")));
         final ServletMapping sm =
                 o.servletMappings("jersey-servlet").iterator().next();
