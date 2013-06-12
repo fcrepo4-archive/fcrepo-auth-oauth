@@ -1,3 +1,4 @@
+
 package org.fcrepo.auth.oauth.integration.api;
 
 import static org.junit.Assert.assertEquals;
@@ -18,43 +19,41 @@ import org.slf4j.LoggerFactory;
 
 public class TestBinding {
 
-	private final Logger LOGGER = LoggerFactory.getLogger(TestBinding.class);
-	
-	@Test
-	public void testBinding() throws JAXBException {
-		JAXBContext context = JAXBContext.newInstance(WebAppConfig.class);
-		Unmarshaller u = context.createUnmarshaller();
-		WebAppConfig o = (WebAppConfig) u.unmarshal(getClass().getResourceAsStream("/web.xml"));
-		assertEquals("Fedora-on-ModeShape", o.displayName());
-		assertTrue(o.contextParams.contains(
-				new ContextParam(
-						"contextConfigLocation",
-						"classpath:spring-test/rest.xml; " +
-		                "classpath:spring-test/repo.xml; " +
-						"classpath:spring-test/security.xml")));
-		assertTrue(o.contextParams.contains(
-				new ContextParam(
-						"org.modeshape.jcr.RepositoryName",
-						"repo")));
-		assertTrue(o.contextParams.contains(
-				new ContextParam(
-						"org.modeshape.jcr.URL",
-						"/test_repository.json")));
-		assertTrue(o.listeners.contains(
-				new Listener(null, "org.springframework.web.context.ContextLoaderListener")));
-		assertTrue(o.listeners.contains(
-				new Listener(null, "org.modeshape.web.jcr.ModeShapeJcrDeployer")));
-		ServletMapping sm = o.servletMappings("jersey-servlet").iterator().next();
-		assertNotNull(sm);
-		assertEquals("/*", sm.urlPattern());
-		
-		FilterMapping fm = o.filterMappings("TokenFilter").iterator().next();
-		assertNotNull(fm);
-		assertEquals("/token", fm.urlPattern());
+    private final Logger LOGGER = LoggerFactory.getLogger(TestBinding.class);
 
-		fm = o.filterMappings("OpFilter").iterator().next();
-		assertNotNull(fm);
-		assertEquals("/rest/objects/authenticated/*", fm.urlPattern());
+    @Test
+    public void testBinding() throws JAXBException {
+        LOGGER.trace("Executing testBinding()");
+        final JAXBContext context = JAXBContext.newInstance(WebAppConfig.class);
+        final Unmarshaller u = context.createUnmarshaller();
+        final WebAppConfig o =
+                (WebAppConfig) u.unmarshal(getClass().getResourceAsStream(
+                        "/web.xml"));
+        assertEquals("Fedora-on-ModeShape", o.displayName());
+        assertTrue(o.contextParams.contains(new ContextParam(
+                "contextConfigLocation", "classpath:spring-test/rest.xml; "
+                        + "classpath:spring-test/repo.xml; "
+                        + "classpath:spring-test/security.xml")));
+        assertTrue(o.contextParams.contains(new ContextParam(
+                "org.modeshape.jcr.RepositoryName", "repo")));
+        assertTrue(o.contextParams.contains(new ContextParam(
+                "org.modeshape.jcr.URL", "/test_repository.json")));
+        assertTrue(o.listeners.contains(new Listener(null,
+                "org.springframework.web.context.ContextLoaderListener")));
+        assertTrue(o.listeners.contains(new Listener(null,
+                "org.modeshape.web.jcr.ModeShapeJcrDeployer")));
+        final ServletMapping sm =
+                o.servletMappings("jersey-servlet").iterator().next();
+        assertNotNull(sm);
+        assertEquals("/*", sm.urlPattern());
 
-	}
+        FilterMapping fm = o.filterMappings("TokenFilter").iterator().next();
+        assertNotNull(fm);
+        assertEquals("/token", fm.urlPattern());
+
+        fm = o.filterMappings("OpFilter").iterator().next();
+        assertNotNull(fm);
+        assertEquals("/rest/objects/authenticated/*", fm.urlPattern());
+
+    }
 }

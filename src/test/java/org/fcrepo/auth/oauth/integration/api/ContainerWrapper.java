@@ -28,10 +28,6 @@ import org.slf4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.web.filter.DelegatingFilterProxy;
-
-import com.sun.jersey.spi.spring.container.servlet.SpringServlet;
-import com.sun.jersey.test.framework.JerseyTest;
 
 public class ContainerWrapper implements ApplicationContextAware {
 
@@ -40,7 +36,7 @@ public class ContainerWrapper implements ApplicationContextAware {
     private int port;
 
     private HttpServer server;
-    
+
     private String configLocation;
 
     public void setConfigLocation(final String configLocation) {
@@ -52,59 +48,65 @@ public class ContainerWrapper implements ApplicationContextAware {
     }
 
     public void start() throws Exception {
-    	
-		JAXBContext context = JAXBContext.newInstance(WebAppConfig.class);
-		Unmarshaller u = context.createUnmarshaller();
-		WebAppConfig o = (WebAppConfig) u.unmarshal(getClass().getResource(this.configLocation));
-    	
+
+        final JAXBContext context = JAXBContext.newInstance(WebAppConfig.class);
+        final Unmarshaller u = context.createUnmarshaller();
+        final WebAppConfig o =
+                (WebAppConfig) u.unmarshal(getClass().getResource(
+                        this.configLocation));
+
         final URI uri = URI.create("http://localhost:" + port + "/");
 
         final Map<String, String> initParams = new HashMap<String, String>();
 
         server = GrizzlyWebContainerFactory.create(uri, initParams);
-        
+
         // create a "root" web application
-        WebappContext wac = new WebappContext(o.displayName(), "");
-        
-        for (ContextParam p: o.contextParams()) {
-        	wac.addContextInitParameter(p.name(), p.value());
+        final WebappContext wac = new WebappContext(o.displayName(), "");
+
+        for (final ContextParam p : o.contextParams()) {
+            wac.addContextInitParameter(p.name(), p.value());
         }
-        
-        for (Listener l: o.listeners) {
-        	wac.addListener(l.className());
+
+        for (final Listener l : o.listeners) {
+            wac.addListener(l.className());
         }
-        
-        for (Servlet s: o.servlets) {
-            ServletRegistration servlet = wac.addServlet(s.servletName(), s.servletClass());
-            
-            Collection<ServletMapping> mappings = o.servletMappings(s.servletName());
-            for (ServletMapping sm: mappings) {
-            	servlet.addMapping(sm.urlPattern());
+
+        for (final Servlet s : o.servlets) {
+            final ServletRegistration servlet =
+                    wac.addServlet(s.servletName(), s.servletClass());
+
+            final Collection<ServletMapping> mappings =
+                    o.servletMappings(s.servletName());
+            for (final ServletMapping sm : mappings) {
+                servlet.addMapping(sm.urlPattern());
             }
-            for (InitParam p: s.initParams()) {
-            	servlet.setInitParameter(p.name(), p.value());
+            for (final InitParam p : s.initParams()) {
+                servlet.setInitParameter(p.name(), p.value());
             }
         }
-        
-        for (Filter f: o.filters) {
-        	FilterRegistration filter = wac.addFilter(f.filterName(), f.filterClass());
-            
-            Collection<FilterMapping> mappings = o.filterMappings(f.filterName());
-            for (FilterMapping sm: mappings) {
-            	String urlPattern = sm.urlPattern();
-            	String servletName = sm.servletName();
-            	if (urlPattern != null) {
-            		filter.addMappingForUrlPatterns(null, urlPattern);
-            	} else {
-            		filter.addMappingForServletNames(null, servletName);
-            	}
+
+        for (final Filter f : o.filters) {
+            final FilterRegistration filter =
+                    wac.addFilter(f.filterName(), f.filterClass());
+
+            final Collection<FilterMapping> mappings =
+                    o.filterMappings(f.filterName());
+            for (final FilterMapping sm : mappings) {
+                final String urlPattern = sm.urlPattern();
+                final String servletName = sm.servletName();
+                if (urlPattern != null) {
+                    filter.addMappingForUrlPatterns(null, urlPattern);
+                } else {
+                    filter.addMappingForServletNames(null, servletName);
+                }
 
             }
-            for (InitParam p: f.initParams()) {
-            	filter.setInitParameter(p.name(), p.value());
+            for (final InitParam p : f.initParams()) {
+                filter.setInitParameter(p.name(), p.value());
             }
         }
-            	
+
         wac.deploy(server);
 
         final URL webXml = this.getClass().getResource("/web.xml");
@@ -118,11 +120,11 @@ public class ContainerWrapper implements ApplicationContextAware {
         server.stop();
     }
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext)
-			throws BeansException {
-		//this.applicationContext = applicationContext;
-		
-	}
+    @Override
+    public void setApplicationContext(
+            final ApplicationContext applicationContext) throws BeansException {
+        //this.applicationContext = applicationContext;
+
+    }
 
 }
