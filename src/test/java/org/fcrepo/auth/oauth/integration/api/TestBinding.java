@@ -36,14 +36,8 @@ public class TestBinding {
                 "contextConfigLocation", "classpath:spring-test/rest.xml; "
                         + "classpath:spring-test/repo.xml; "
                         + "classpath:spring-test/security.xml")));
-        assertTrue(o.contextParams().contains(new ContextParam(
-                "org.modeshape.jcr.RepositoryName", "repo")));
-        assertTrue(o.contextParams().contains(new ContextParam(
-                "org.modeshape.jcr.URL", "/test_repository.json")));
         assertTrue(o.listeners().contains(new Listener(null,
                 "org.springframework.web.context.ContextLoaderListener")));
-        assertTrue(o.listeners().contains(new Listener(null,
-                "org.modeshape.web.jcr.ModeShapeJcrDeployer")));
         final ServletMapping sm =
                 o.servletMappings("jersey-servlet").iterator().next();
         assertNotNull(sm);

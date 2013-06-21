@@ -7,25 +7,48 @@
     <version>4.0-SNAPSHOT</version>
   </parent>
   <artifactId>fcrepo-auth-oauth</artifactId>
-  <name>Apache Oltu OAuth2 module for Fedora Commons 4</name>
+  <name>${project.artifactId}</name>
+  <description>Fedora OAuth 2.0 module</description>
+  <packaging>bundle</packaging>
+  
+  <properties>
+    <oltu.version>0.31-SNAPSHOT</oltu.version>
+  </properties>
+  
   <dependencies>
     <dependency>
       <artifactId>fcrepo-http-api</artifactId>
       <groupId>org.fcrepo</groupId>
       <version>${project.version}</version>
+      <exclusions>
+        <!-- Dependency convergence: fcrepo-http-api (via jersey-json:1.17.1) 
+        depends on jettison:1.1, but org.apache.oltu.oauth2.authzserver
+        depends on jettison:1.2 -->
+        <exclusion>
+          <groupId>org.codehaus.jettison</groupId>
+          <artifactId>jettison</artifactId>
+        </exclusion>
+        <!-- Dependency convergence: fcrepo-http-api (via fcrepo-jcr)
+        depends on commons-codec:1.6, but org.apache.oltu.oauth2.authzserver
+        depends on commons-codec:1.8 -->
+        <exclusion>
+          <groupId>commons-codec</groupId>
+          <artifactId>commons-codec</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.oltu.oauth2</groupId>
       <artifactId>org.apache.oltu.oauth2.authzserver</artifactId>
-      <version>0.31-SNAPSHOT</version>
+      <version>${oltu.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.oltu.oauth2</groupId>
       <artifactId>oltu-oauth2-resourceserver-filter</artifactId>
-      <version>0.31-SNAPSHOT</version>
+      <version>${oltu.version}</version>
     </dependency>
-    
-    
+
+
     <!-- test gear -->
     <dependency>
       <groupId>org.fcrepo</groupId>
@@ -33,6 +56,15 @@
       <version>${project.version}</version>
       <classifier>tests</classifier>
       <scope>test</scope>
+      <exclusions>
+        <!-- Dependency convergence: fcrepo-kernel
+        depends on commons-codec:1.6, but org.apache.oltu.oauth2.authzserver
+        depends on commons-codec:1.8 -->
+        <exclusion>
+          <groupId>commons-codec</groupId>
+          <artifactId>commons-codec</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.fcrepo</groupId>
@@ -45,19 +77,16 @@
       <groupId>org.glassfish.grizzly</groupId>
       <artifactId>grizzly-http-server</artifactId>
       <scope>test</scope>
-      <version>2.2.21</version>
     </dependency>
     <dependency>
       <groupId>org.glassfish.grizzly</groupId>
       <artifactId>grizzly-http-servlet</artifactId>
       <scope>test</scope>
-      <version>2.2.21</version>
     </dependency>
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-grizzly2</artifactId>
       <scope>test</scope>
-      <version>1.17.1</version>
     </dependency>
     <dependency>
       <groupId>javax.mail</groupId>
@@ -68,12 +97,6 @@
       <groupId>com.sun.jersey.contribs</groupId>
       <artifactId>jersey-spring</artifactId>
       <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.springframework</groupId>
-          <artifactId>spring-core</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -86,40 +109,54 @@
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
+      <exclusions>
+        <!-- Dependency convergence: httpclient:4.2.5 
+        depends on commons-codec:1.6, but org.apache.oltu.oauth2.authzserver
+        depends on commons-codec:1.8 -->
+        <exclusion>
+          <groupId>commons-codec</groupId>
+          <artifactId>commons-codec</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
-
     <dependency>
-    	<groupId>com.sun.jersey.jersey-test-framework</groupId>
-    	<artifactId>jersey-test-framework-grizzly2</artifactId>
-    	<version>1.17.1</version>
-    	<scope>test</scope>
+      <groupId>com.sun.jersey.jersey-test-framework</groupId>
+      <artifactId>jersey-test-framework-grizzly2</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
-    	<groupId>com.sun.jersey</groupId>
-    	<artifactId>jersey-servlet</artifactId>
-    	<version>1.14</version>
-    	<scope>test</scope>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-servlet</artifactId>
+      <version>${jersey.version}</version>
+      <scope>test</scope>
     </dependency>
     <!-- Playing with ordered loading for tests -->
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
-      <version>3.0.1</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>javax.annotation</groupId>
       <artifactId>javax.annotation-api</artifactId>
-      <version>1.2-b04</version>
+      <version>1.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-    	<groupId>org.glassfish.jersey.containers</groupId>
-    	<artifactId>jersey-container-grizzly2-servlet</artifactId>
-    	<version>2.0</version>
-    	<scope>test</scope>
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-grizzly2-servlet</artifactId>
+      <version>2.0</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
   <repositories>
     <repository>
       <id>Apache Snapshots</id>
