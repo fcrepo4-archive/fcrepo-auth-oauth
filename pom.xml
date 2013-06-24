@@ -10,11 +10,9 @@
   <name>${project.artifactId}</name>
   <description>Fedora OAuth 2.0 module</description>
   <packaging>bundle</packaging>
-  
   <properties>
     <oltu.version>0.31-SNAPSHOT</oltu.version>
   </properties>
-  
   <dependencies>
     <dependency>
       <artifactId>fcrepo-http-api</artifactId>
@@ -22,15 +20,14 @@
       <version>${project.version}</version>
       <exclusions>
         <!-- Dependency convergence: fcrepo-http-api (via jersey-json:1.17.1) 
-        depends on jettison:1.1, but org.apache.oltu.oauth2.authzserver
-        depends on jettison:1.2 -->
+          depends on jettison:1.1, but org.apache.oltu.oauth2.authzserver depends on 
+          jettison:1.2 -->
         <exclusion>
           <groupId>org.codehaus.jettison</groupId>
           <artifactId>jettison</artifactId>
         </exclusion>
-        <!-- Dependency convergence: fcrepo-http-api (via fcrepo-jcr)
-        depends on commons-codec:1.6, but org.apache.oltu.oauth2.authzserver
-        depends on commons-codec:1.8 -->
+        <!-- Dependency convergence: fcrepo-http-api (via fcrepo-jcr) depends 
+          on commons-codec:1.6, but org.apache.oltu.oauth2.authzserver depends on commons-codec:1.8 -->
         <exclusion>
           <groupId>commons-codec</groupId>
           <artifactId>commons-codec</artifactId>
@@ -47,8 +44,6 @@
       <artifactId>oltu-oauth2-resourceserver-filter</artifactId>
       <version>${oltu.version}</version>
     </dependency>
-
-
     <!-- test gear -->
     <dependency>
       <groupId>org.fcrepo</groupId>
@@ -57,9 +52,8 @@
       <classifier>tests</classifier>
       <scope>test</scope>
       <exclusions>
-        <!-- Dependency convergence: fcrepo-kernel
-        depends on commons-codec:1.6, but org.apache.oltu.oauth2.authzserver
-        depends on commons-codec:1.8 -->
+        <!-- Dependency convergence: fcrepo-kernel depends on commons-codec:1.6, 
+          but org.apache.oltu.oauth2.authzserver depends on commons-codec:1.8 -->
         <exclusion>
           <groupId>commons-codec</groupId>
           <artifactId>commons-codec</artifactId>
@@ -110,9 +104,8 @@
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
       <exclusions>
-        <!-- Dependency convergence: httpclient:4.2.5 
-        depends on commons-codec:1.6, but org.apache.oltu.oauth2.authzserver
-        depends on commons-codec:1.8 -->
+        <!-- Dependency convergence: httpclient:4.2.5 depends on commons-codec:1.6, 
+          but org.apache.oltu.oauth2.authzserver depends on commons-codec:1.8 -->
         <exclusion>
           <groupId>commons-codec</groupId>
           <artifactId>commons-codec</artifactId>
@@ -154,6 +147,10 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
