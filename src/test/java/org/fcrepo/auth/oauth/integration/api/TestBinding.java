@@ -18,7 +18,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class TestBinding {
 
     private final Logger LOGGER = LoggerFactory.getLogger(TestBinding.class);
@@ -32,12 +31,16 @@ public class TestBinding {
                 (WebAppConfig) u.unmarshal(getClass().getResourceAsStream(
                         "/web.xml"));
         assertEquals("Fedora-on-ModeShape", o.displayName());
-        assertTrue(o.contextParams().contains(new ContextParam(
-                "contextConfigLocation", "classpath:spring-test/rest.xml; "
-                        + "classpath:spring-test/repo.xml; "
-                        + "classpath:spring-test/security.xml")));
-        assertTrue(o.listeners().contains(new Listener(null,
-                "org.springframework.web.context.ContextLoaderListener")));
+        assertTrue(o.contextParams().contains(
+                new ContextParam("contextConfigLocation",
+                        "classpath:spring-test/rest.xml; "
+                                + "classpath:spring-test/repo.xml; "
+                                + "classpath:spring-test/security.xml")));
+        assertTrue(o
+                .listeners()
+                .contains(
+                        new Listener(null,
+                                "org.springframework.web.context.ContextLoaderListener")));
         final ServletMapping sm =
                 o.servletMappings("jersey-servlet").iterator().next();
         assertNotNull(sm);

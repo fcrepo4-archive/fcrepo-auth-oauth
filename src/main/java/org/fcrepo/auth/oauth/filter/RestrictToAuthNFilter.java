@@ -35,17 +35,15 @@ public class RestrictToAuthNFilter implements Filter {
     }
 
     /*
-     * (non-Javadoc)
-     * Assumes that the filter chain contains {@link
-     * org.apache.oltu.oauth2.rsfilter.OAuthFilter}
-     * in a preceding position.
+     * (non-Javadoc) Assumes that the filter chain contains {@link
+     * org.apache.oltu.oauth2.rsfilter.OAuthFilter} in a preceding position.
      * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest,
      * javax.servlet.ServletResponse, javax.servlet.FilterChain)
      */
     @Override
     public void doFilter(final ServletRequest request,
             final ServletResponse response, final FilterChain chain)
-            throws IOException, ServletException {
+        throws IOException, ServletException {
         final HttpServletRequest req = (HttpServletRequest) request;
         final HttpServletResponse res = (HttpServletResponse) response;
         final String requestURI = req.getRequestURI();

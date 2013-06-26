@@ -63,7 +63,7 @@ public class TokenEndpoint extends AbstractResource {
     @Produces(APPLICATION_JSON)
     public Response getToken(@Context
     final HttpServletRequest request) throws OAuthSystemException,
-            RepositoryException {
+        RepositoryException {
         LOGGER.debug("Received request for token carried on request: {}",
                 request);
         OAuthTokenRequest oauthRequest = null;
@@ -151,7 +151,7 @@ public class TokenEndpoint extends AbstractResource {
     }
 
     private boolean isValidAuthCode(final OAuthTokenRequest oauthRequest)
-            throws RepositoryException {
+        throws RepositoryException {
         final String client = oauthRequest.getClientId();
         LOGGER.debug("Request has authorization client: {}", client);
         final String code = oauthRequest.getCode();
@@ -165,12 +165,12 @@ public class TokenEndpoint extends AbstractResource {
             // if the client is right
             if (authCodeNode.getProperty(CLIENT_PROPERTY).getString().equals(
                     client)) {
-                //                final Set<String> storedScopes =
-                //                        newHashSet(map(authCodeNode
-                //                                .getProperty(SCOPES_PROPERTY).getValues(),
-                //                                value2string));
+                // final Set<String> storedScopes =
+                // newHashSet(map(authCodeNode
+                // .getProperty(SCOPES_PROPERTY).getValues(),
+                // value2string));
                 // and if there is at least one scope in common
-                //if (intersection(storedScopes, scopes).size() > 0) {
+                // if (intersection(storedScopes, scopes).size() > 0) {
                 return true;
                 // }
             }

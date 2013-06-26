@@ -52,7 +52,7 @@ public class AuthzEndpoint extends AbstractResource {
     @GET
     public Response getAuthorization(@Context
     final HttpServletRequest request) throws URISyntaxException,
-            OAuthSystemException, RepositoryException {
+        OAuthSystemException, RepositoryException {
 
         OAuthAuthzRequest oauthRequest = null;
 
@@ -62,7 +62,7 @@ public class AuthzEndpoint extends AbstractResource {
         try {
             oauthRequest = new OAuthAuthzRequest(request);
 
-            //build response according to response_type
+            // build response according to response_type
             final String responseType =
                     oauthRequest.getParam(OAUTH_RESPONSE_TYPE);
 

@@ -36,13 +36,14 @@ public class AuthenticatedRequestWrappingFilter implements Filter {
     @Override
     public void doFilter(final ServletRequest request,
             final ServletResponse response, final FilterChain chain)
-            throws IOException, ServletException {
+        throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
 
         try {
             req.isUserInRole("");
         } catch (final IllegalStateException e) {
-            // stupid grizzly doesn't impl isUserInRole(), so we have to stub it out
+            // stupid grizzly doesn't impl isUserInRole(), so we have to stub it
+            // out
             req =
                     (HttpServletRequest) newProxyInstance(req.getClass()
                             .getClassLoader(),
@@ -54,7 +55,7 @@ public class AuthenticatedRequestWrappingFilter implements Filter {
                                         invoke(final Object proxy,
                                                 final Method method,
                                                 final Object[] args)
-                                                throws Throwable {
+                                            throws Throwable {
                                     if (method.getName().equals("isUserInRole")) {
                                         return true;
                                     }

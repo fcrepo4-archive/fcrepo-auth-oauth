@@ -123,7 +123,7 @@ public class ContainerWrapper implements ApplicationContextAware {
     @Override
     public void setApplicationContext(
             final ApplicationContext applicationContext) throws BeansException {
-        //this.applicationContext = applicationContext;
+        // this.applicationContext = applicationContext;
 
     }
 

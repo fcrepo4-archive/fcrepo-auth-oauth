@@ -13,7 +13,7 @@ public class Util {
 
     public static void
             createOauthWorkspace(final SessionFactory sessionFactory)
-                    throws RepositoryException {
+                throws RepositoryException {
         final Session session = sessionFactory.getSession();
         try {
             if (!copyOf(session.getWorkspace().getAccessibleWorkspaceNames())

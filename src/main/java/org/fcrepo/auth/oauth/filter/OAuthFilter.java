@@ -58,7 +58,7 @@ public class OAuthFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request,
             final ServletResponse response, final FilterChain chain)
-            throws IOException, ServletException {
+        throws IOException, ServletException {
         final HttpServletRequest req = (HttpServletRequest) request;
         final HttpServletResponse res = (HttpServletResponse) response;
 
@@ -118,7 +118,7 @@ public class OAuthFilter implements Filter {
 
     private void respondWithError(final HttpServletResponse resp,
             final OAuthProblemException error) throws IOException,
-            ServletException {
+        ServletException {
 
         OAuthResponse oauthResponse = null;
 
