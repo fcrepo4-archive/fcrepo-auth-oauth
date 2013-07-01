@@ -18,6 +18,11 @@
       <artifactId>fcrepo-http-api</artifactId>
       <groupId>org.fcrepo</groupId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.oltu.oauth2</groupId>
+      <artifactId>org.apache.oltu.oauth2.authzserver</artifactId>
+      <version>${oltu.version}</version>
       <exclusions>
         <!-- Dependency convergence: fcrepo-http-api (via jersey-json:1.17.1) depends 
           on jettison:1.1, but org.apache.oltu.oauth2.authzserver depends on jettison:1.2 -->
@@ -35,13 +40,23 @@
     </dependency>
     <dependency>
       <groupId>org.apache.oltu.oauth2</groupId>
-      <artifactId>org.apache.oltu.oauth2.authzserver</artifactId>
-      <version>${oltu.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.oltu.oauth2</groupId>
       <artifactId>oltu-oauth2-resourceserver-filter</artifactId>
       <version>${oltu.version}</version>
+      <exclusions>
+        <!-- Dependency convergence: fcrepo-http-api (via jersey-json:1.17.1) 
+          depends on jettison:1.1, but org.apache.oltu.oauth2.authzserver depends on 
+          jettison:1.2 -->
+        <exclusion>
+          <groupId>org.codehaus.jettison</groupId>
+          <artifactId>jettison</artifactId>
+        </exclusion>
+        <!-- Dependency convergence: fcrepo-http-api (via fcrepo-jcr) depends 
+          on commons-codec:1.6, but org.apache.oltu.oauth2.authzserver depends on commons-codec:1.8 -->
+        <exclusion>
+          <groupId>commons-codec</groupId>
+          <artifactId>commons-codec</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <!-- test gear -->
     <dependency>
@@ -50,14 +65,6 @@
       <version>${project.version}</version>
       <classifier>tests</classifier>
       <scope>test</scope>
-      <exclusions>
-        <!-- Dependency convergence: fcrepo-kernel depends on commons-codec:1.6, 
-          but org.apache.oltu.oauth2.authzserver depends on commons-codec:1.8 -->
-        <exclusion>
-          <groupId>commons-codec</groupId>
-          <artifactId>commons-codec</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.fcrepo</groupId>

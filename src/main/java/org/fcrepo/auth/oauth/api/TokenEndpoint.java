@@ -1,17 +1,12 @@
 /**
- * Copyright 2013 DuraSpace, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright 2013 DuraSpace, Inc. Licensed under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law
+ * or agreed to in writing, software distributed under the License is
+ * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
  */
 
 package org.fcrepo.auth.oauth.api;
@@ -35,6 +30,7 @@ import static org.fcrepo.auth.oauth.Constants.PRINCIPAL_PROPERTY;
 import static org.fcrepo.auth.oauth.api.Util.createOauthWorkspace;
 import static org.slf4j.LoggerFactory.getLogger;
 
+import java.security.AccessControlException;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -64,6 +60,10 @@ import org.fcrepo.AbstractResource;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
+/**
+ * @author ajs6f
+ * @date Jul 1, 2013
+ */
 @Component
 @Path("/token")
 public class TokenEndpoint extends AbstractResource {
@@ -73,6 +73,12 @@ public class TokenEndpoint extends AbstractResource {
 
     private static final Logger LOGGER = getLogger(TokenEndpoint.class);
 
+    /**
+     * @param request An HTTP request
+     * @return A token-bearing HTTP response
+     * @throws OAuthSystemException
+     * @throws RepositoryException
+     */
     @POST
     @Consumes(APPLICATION_FORM_URLENCODED)
     @Produces(APPLICATION_JSON)
@@ -165,6 +171,12 @@ public class TokenEndpoint extends AbstractResource {
         }
     }
 
+    /**
+     * @param oauthRequest
+     * @return An answer to whether or not this request matches up with an
+     *         authorization code issued at the {@link AuthzEndpoint}
+     * @throws RepositoryException
+     */
     private boolean isValidAuthCode(final OAuthTokenRequest oauthRequest)
         throws RepositoryException {
         final String client = oauthRequest.getClientId();
@@ -195,11 +207,19 @@ public class TokenEndpoint extends AbstractResource {
         } finally {
             session.logout();
         }
-        throw new RuntimeException(
+        throw new AccessControlException(
                 "Could not establish validity or invalidity of authorization code! Code:" +
                         code);
     }
 
+    /**
+     * Stores a token for later use by the configured {@link OAuthRSProvider}
+     * 
+     * @param token
+     * @param client
+     * @param username
+     * @throws RepositoryException
+     */
     private void saveToken(final String token, final String client,
             final String username) throws RepositoryException {
         final Session session = sessions.getSession(OAUTH_WORKSPACE);

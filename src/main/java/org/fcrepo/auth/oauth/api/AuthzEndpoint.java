@@ -1,17 +1,12 @@
 /**
- * Copyright 2013 DuraSpace, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright 2013 DuraSpace, Inc. Licensed under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law
+ * or agreed to in writing, software distributed under the License is
+ * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
  */
 
 package org.fcrepo.auth.oauth.api;
@@ -58,12 +53,24 @@ import static org.fcrepo.auth.oauth.Constants.OAUTH_WORKSPACE;
 import static org.fcrepo.auth.oauth.api.Util.createOauthWorkspace;
 import static org.slf4j.LoggerFactory.getLogger;
 
+/**
+ * @author ajs6f
+ * @date Jul 1, 2013
+ */
 @Component
 @Path("/authorization")
 public class AuthzEndpoint extends AbstractResource {
 
     private static final Logger LOGGER = getLogger(AuthzEndpoint.class);
 
+    /**
+     * @param request An HTTP request
+     * @return An authorization code for later use with the
+     *         {@link TokenEndpoint}
+     * @throws URISyntaxException
+     * @throws OAuthSystemException
+     * @throws RepositoryException
+     */
     @GET
     public Response getAuthorization(@Context
     final HttpServletRequest request) throws URISyntaxException,
@@ -114,7 +121,7 @@ public class AuthzEndpoint extends AbstractResource {
 
             if (isEmpty(redirectUri)) {
                 throw new WebApplicationException(responseBuilder.entity(
-                        "OAuth callback url needs to be provided by client!!!")
+                        "OAuth callback url needs to be provided by client!")
                         .build());
             }
             final OAuthResponse response =
@@ -125,6 +132,14 @@ public class AuthzEndpoint extends AbstractResource {
         }
     }
 
+    /**
+     * Saves an authorization code for later retrieval at the token endpoint.
+     * 
+     * @param authCode
+     * @param scopes
+     * @param client
+     * @throws RepositoryException
+     */
     private void saveAuthCode(final String authCode, final Set<String> scopes,
             final String client) throws RepositoryException {
         final Session session = sessions.getSession(OAUTH_WORKSPACE);
@@ -142,6 +157,12 @@ public class AuthzEndpoint extends AbstractResource {
 
     }
 
+    /**
+     * Ensures the existence of the workspace into which authorization codes are
+     * stored.
+     * 
+     * @throws RepositoryException
+     */
     @PostConstruct
     public void init() throws RepositoryException {
         createOauthWorkspace(sessions);

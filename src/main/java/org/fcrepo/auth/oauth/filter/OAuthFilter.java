@@ -1,21 +1,18 @@
 /**
- * Copyright 2013 DuraSpace, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright 2013 DuraSpace, Inc. Licensed under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law
+ * or agreed to in writing, software distributed under the License is
+ * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
  */
 
 package org.fcrepo.auth.oauth.filter;
 
+import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.apache.oltu.oauth2.common.OAuth.OAUTH_CLIENT_ID;
 import static org.apache.oltu.oauth2.common.OAuth.HeaderType.WWW_AUTHENTICATE;
@@ -49,6 +46,10 @@ import org.apache.oltu.oauth2.rsfilter.OAuthDecision;
 import org.apache.oltu.oauth2.rsfilter.OAuthRSProvider;
 import org.slf4j.Logger;
 
+/**
+ * @author ajs6f
+ * @date Jul 1, 2013
+ */
 public class OAuthFilter implements Filter {
 
     private static final Logger LOGGER = getLogger(OAuthFilter.class);
@@ -131,6 +132,14 @@ public class OAuthFilter implements Filter {
 
     }
 
+    /**
+     * Constructs an OAuth-supported HTTP error response.
+     * 
+     * @param resp
+     * @param error
+     * @throws IOException
+     * @throws ServletException
+     */
     private void respondWithError(final HttpServletResponse resp,
             final OAuthProblemException error) throws IOException,
         ServletException {
@@ -145,11 +154,11 @@ public class OAuthFilter implements Filter {
 
             } else {
 
-                int responseCode = 401;
+                int responseCode = SC_UNAUTHORIZED;
                 if (error.getError().equals(INVALID_REQUEST)) {
-                    responseCode = 400;
+                    responseCode = SC_BAD_REQUEST;
                 } else if (error.getError().equals(INSUFFICIENT_SCOPE)) {
-                    responseCode = 403;
+                    responseCode = SC_FORBIDDEN;
                 }
 
                 oauthResponse =
@@ -166,14 +175,23 @@ public class OAuthFilter implements Filter {
         }
     }
 
+    /**
+     * @param realm
+     */
     public void setRealm(final String realm) {
         this.realm = realm;
     }
 
+    /**
+     * @param provider
+     */
     public void setProvider(final OAuthRSProvider provider) {
         this.provider = provider;
     }
 
+    /**
+     * @param parameterStylesSet
+     */
     public void
             setParameterStyles(final Set<ParameterStyle> parameterStylesSet) {
         this.parameterStyles = parameterStylesSet;
